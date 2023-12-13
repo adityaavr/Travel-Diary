@@ -29,6 +29,7 @@ public class NewEntryFragment extends Fragment {
     private Uri photoUri;
     private String currentPhotoPath;
     private DiaryHelper diaryHelper;
+    private GPSTracker gpsTracker;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,18 +48,31 @@ public class NewEntryFragment extends Fragment {
         imageViewPhoto = view.findViewById(R.id.imageViewPhoto);
         Button buttonSaveEntry = view.findViewById(R.id.buttonSaveEntry);
 
+        // initialisation for gpsTracker
+        gpsTracker = new GPSTracker(requireContext(), new GPSTracker.LocationUpdateListener() {
+            @Override
+            public void onLocationUpdate(double latitude, double longitude) {
+                // You can handle location updates here if needed
+            }
+        });
+
         buttonTakePhoto.setOnClickListener(v -> dispatchTakePictureIntent());
         buttonSaveEntry.setOnClickListener(v -> {
             String title = editTextTitle.getText().toString();
             String description = editTextDescription.getText().toString();
 
-            diaryHelper.insert(title, currentPhotoPath, description, 0.0, 0.0); // Assuming lat and lon are 0.0 for now
+            // Get the current location from the GPS tracker
+            double currentLat = gpsTracker.getLatitude();
+            double currentLon = gpsTracker.getLongitude();
+
+            diaryHelper.insert(title, currentPhotoPath, description, currentLat, currentLon);
 
             editTextTitle.setText("");
             editTextDescription.setText("");
             imageViewPhoto.setVisibility(View.GONE);
             currentPhotoPath = null; // Reset the current photo path after saving
         });
+
 
         return view;
     }

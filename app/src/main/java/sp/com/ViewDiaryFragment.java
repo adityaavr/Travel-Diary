@@ -12,6 +12,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,19 +53,33 @@ public class ViewDiaryFragment extends Fragment {
     private List<DiaryEntry> fetchDiaryEntries() {
         List<DiaryEntry> entries = new ArrayList<>();
         Cursor cursor = diaryHelper.getAll();
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                String title = cursor.getString(cursor.getColumnIndex("diaryTitle"));
-                String imagePath = cursor.getString(cursor.getColumnIndex("diaryImage"));
-                String description = cursor.getString(cursor.getColumnIndex("diaryDesc"));
-                // Add other fields as necessary
 
-                entries.add(new DiaryEntry(title, imagePath, description));
-            } while (cursor.moveToNext());
+        if (cursor != null) {
+            int titleIndex = cursor.getColumnIndex("diaryTitle");
+            int imageIndex = cursor.getColumnIndex("diaryImage");
+            int descIndex = cursor.getColumnIndex("diaryDesc");
+            int latIndex = cursor.getColumnIndex("lat");
+            int lonIndex = cursor.getColumnIndex("lon");
+
+            while (cursor.moveToNext()) {
+                // Check if the columns exist in the cursor
+                if (titleIndex != -1 && imageIndex != -1 && descIndex != -1 && latIndex != -1 && lonIndex != -1) {
+                    String title = cursor.getString(titleIndex);
+                    String imagePath = cursor.getString(imageIndex);
+                    String description = cursor.getString(descIndex);
+                    double latitude = cursor.getDouble(latIndex);
+                    double longitude = cursor.getDouble(lonIndex);
+
+                    entries.add(new DiaryEntry(title, imagePath, description, latitude, longitude));
+                }
+            }
+
             cursor.close();
         }
+
         return entries;
     }
+
 
     // Inner class for the RecyclerView adapter
     private class DiaryEntryAdapter extends RecyclerView.Adapter<DiaryEntryAdapter.DiaryEntryViewHolder> {
@@ -83,8 +102,11 @@ public class ViewDiaryFragment extends Fragment {
             DiaryEntry entry = diaryEntries.get(position);
             holder.textViewDiaryTitle.setText(entry.getTitle());
             holder.textViewDiaryDescription.setText(entry.getDescription());
-            // Load image into imageViewDiaryPhoto using imagePath
-            // You can use libraries like Glide or Picasso here
+
+            // Load image into imageViewDiaryPhoto using Glide
+            Glide.with(holder.itemView)
+                    .load(entry.getImagePath())
+                    .into(holder.imageViewDiaryPhoto);
         }
 
         @Override

@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!-- fragment_map.xml -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapViewFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Your existing MapView -->
     <androidx.fragment.app.FragmentContainerView
@@ -11,7 +10,8 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MapViewFragment" />
+        android:layout_above="@+id/btnRecordSession"
+        tools:context=".MapFragment" />
 
     <!-- Circular button for recording a session at the bottom right -->
     <Button
@@ -30,4 +30,5 @@
         android:textSize="10sp" />
 
 </RelativeLayout>
+
 

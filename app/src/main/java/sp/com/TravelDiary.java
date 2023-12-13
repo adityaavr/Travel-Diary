@@ -13,7 +13,7 @@ public class TravelDiary extends AppCompatActivity {
     private BottomNavigationView navView;
     private NewEntryFragment newEntryFragment;
     private ViewDiaryFragment viewDiaryFragment;
-    private MapViewFragment mapViewFragment;
+    private MapFragment mapViewFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +26,7 @@ public class TravelDiary extends AppCompatActivity {
         // Initialize the fragments
         newEntryFragment = new NewEntryFragment();
         viewDiaryFragment = new ViewDiaryFragment();
-        mapViewFragment = new MapViewFragment();
+        mapViewFragment = new MapFragment();
 
         // Load the default fragment when the app starts
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, newEntryFragment).commit();

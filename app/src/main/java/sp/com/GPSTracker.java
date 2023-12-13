@@ -1,5 +1,6 @@
 package sp.com;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -21,6 +23,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 public class GPSTracker extends Service {
 
+    private static final int PERMISSION_REQUEST_CODE = 101; // You can choose any integer value
+
     private final Context mContext;
     private FusedLocationProviderClient fusedLocationClient;
     private Location location;
@@ -29,17 +33,16 @@ public class GPSTracker extends Service {
     private LocationCallback locationCallback;
     private LocationUpdateListener locationUpdateListener;
 
-    public GPSTracker(Context context) {
+    public GPSTracker(Context context, LocationUpdateListener listener) {
         this.mContext = context;
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
-        getLocation();
+        getLocation(listener);
     }
 
-    public void getLocation() {
-        if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Request Permissions
-            ActivityCompat.requestPermissions((Activity) mContext, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
+    public void getLocation(LocationUpdateListener listener) {
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Permission not granted yet, handle it as needed
             return;
         }
 
@@ -51,6 +54,11 @@ public class GPSTracker extends Service {
                             location = loc;
                             latitude = location.getLatitude();
                             longitude = location.getLongitude();
+
+                            // Notify the listener
+                            if (listener != null) {
+                                listener.onLocationUpdate(latitude, longitude);
+                            }
                         }
                     }
                 })
@@ -72,37 +80,42 @@ public class GPSTracker extends Service {
     }
 
     public void startLocationUpdates() {
-        if (fusedLocationClient != null) {
-            // Create a location request with desired parameters
-            LocationRequest locationRequest = new LocationRequest();
-            locationRequest.setInterval(10000); // Update interval in milliseconds
-            locationRequest.setFastestInterval(5000); // Fastest update interval in milliseconds
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request Permissions
+            ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_CODE);
+            return;
+        }
 
-            // Create a location callback
-            locationCallback = new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    if (locationResult == null) {
-                        return;
-                    }
+        // Create a location request with desired parameters
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000); // Update interval in milliseconds
+        locationRequest.setFastestInterval(5000); // Fastest update interval in milliseconds
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-                    for (Location location : locationResult.getLocations()) {
-                        // Update location values
-                        latitude = location.getLatitude();
-                        longitude = location.getLongitude();
+        // Create a location callback
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
 
-                        // Notify the listener
-                        if (locationUpdateListener != null) {
-                            locationUpdateListener.onLocationUpdate(latitude, longitude);
-                        }
+                for (Location location : locationResult.getLocations()) {
+                    // Update location values
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+
+                    // Notify the listener
+                    if (locationUpdateListener != null) {
+                        locationUpdateListener.onLocationUpdate(latitude, longitude);
                     }
                 }
-            };
+            }
+        };
 
-            // Request location updates
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-        }
+        // Request location updates
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
     public void stopLocationUpdates() {
@@ -125,5 +138,7 @@ public class GPSTracker extends Service {
         return null;
     }
 }
+
+
 
 
