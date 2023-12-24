@@ -39,14 +39,6 @@ public class DiaryHelper extends SQLiteOpenHelper {
                         "lat, lon, timestamp FROM diaries_table ORDER BY timestamp DESC", null));
     }
 
-    public Cursor getById(String id) {
-        String[] args = {id};
-
-        return (getReadableDatabase().rawQuery(
-                "SELECT _id, diaryTitle, diaryImage, diaryDesc, " +
-                        "lat, lon, timestamp FROM diaries_table WHERE _ID = ?", args));
-    }
-
     public Cursor getByDate(String date) {
         SQLiteDatabase db = getReadableDatabase();
         String[] columns = {"_id", "diaryTitle", "diaryImage", "diaryDesc", "lat", "lon", "timestamp"};
@@ -92,34 +84,6 @@ public class DiaryHelper extends SQLiteOpenHelper {
         cv.put("timestamp", System.currentTimeMillis()); // Update timestamp
 
         getWritableDatabase().update("diaries_table", cv, " _ID = ?", args);
-    }
-
-    public String getID(Cursor c) {
-        return (c.getString(0));
-    }
-
-    public String getDiaryTitle(Cursor c) {
-        return (c.getString(1));
-    }
-
-    public String getDiaryImage(Cursor c) {
-        return (c.getString(2));
-    }
-
-    public String getDiaryDesc(Cursor c) {
-        return (c.getString(3));
-    }
-
-    public double getLatitude(Cursor c) {
-        return (c.getDouble(4));
-    }
-
-    public double getLongitude(Cursor c) {
-        return (c.getDouble(5));
-    }
-
-    public long getTimestamp(Cursor c) {
-        return (c.getLong(6));
     }
 }
 
