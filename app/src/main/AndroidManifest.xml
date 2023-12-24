@@ -16,7 +16,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.P2204398Assignment"
         tools:targetApi="31">
-
+        <activity
+            android:name=".TravelDiary"
+            android:exported="false" />
+        <activity
+            android:name=".DiaryList"
+            android:exported="false" />
+        <activity
+            android:name=".About"
+            android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -40,7 +48,8 @@
         <service
             android:name=".GPSTracker"
             android:enabled="false"
-            android:exported="false" /> <!-- FileProvider configuration -->
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="sp.com.fileprovider"
@@ -52,7 +61,7 @@
         </provider>
 
         <activity
-            android:name=".TravelDiary"
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

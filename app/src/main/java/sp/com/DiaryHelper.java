@@ -5,10 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class DiaryHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "travelDiary.db";
-    private static final int SCHEMA_VERSION = 2;
+    private static final int SCHEMA_VERSION = 4; // Increase the version for the new schema
 
     public DiaryHelper(Context context) {
         super(context, DATABASE_NAME, null, SCHEMA_VERSION);
@@ -16,21 +19,23 @@ public class DiaryHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        // Create the diaries_table with appropriate columns
         db.execSQL("CREATE TABLE diaries_table ( _id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "diaryTitle TEXT, diaryImage TEXT, diaryDesc TEXT, " +
-                "lat REAL, lon REAL, timestamp INTEGER);");
+                "lat REAL, lon REAL, timestamp INTEGER, diaryDate TEXT);"); // Add diaryDate column
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Will not be called until SCHEMA_VERSION increases
-        // Here we can upgrade the database e.g. add more tables
+        // Handle the upgrade by dropping the existing table and creating a new one
+        db.execSQL("DROP TABLE IF EXISTS diaries_table");
+        onCreate(db);
     }
 
     /* Read all records from diaries_table */
     public Cursor getAll() {
         return (getReadableDatabase().rawQuery(
-                "SELECT _id, diaryTitle, diaryImage, diaryDesc," +
+                "SELECT _id, diaryTitle, diaryImage, diaryDesc, diaryDate," +
                         "lat, lon, timestamp FROM diaries_table ORDER BY timestamp DESC", null));
     }
 
@@ -42,6 +47,18 @@ public class DiaryHelper extends SQLiteOpenHelper {
                         "lat, lon, timestamp FROM diaries_table WHERE _ID = ?", args));
     }
 
+    public Cursor getByDate(String date) {
+        SQLiteDatabase db = getReadableDatabase();
+        String[] columns = {"_id", "diaryTitle", "diaryImage", "diaryDesc", "lat", "lon", "timestamp"};
+
+        // Assuming your date is stored as a string in the format 'yyyy-MM-dd'
+        String selection = "strftime('%Y-%m-%d', timestamp/1000, 'unixepoch') = ?";
+        String[] selectionArgs = {date};
+
+        return db.query("diaries_table", columns, selection, selectionArgs, null, null, "timestamp DESC");
+    }
+
+
     public void insert(String diaryTitle, String diaryImage, String diaryDesc,
                        double lat, double lon) {
         ContentValues cv = new ContentValues();
@@ -51,9 +68,15 @@ public class DiaryHelper extends SQLiteOpenHelper {
         cv.put("diaryDesc", diaryDesc);
         cv.put("lat", lat);
         cv.put("lon", lon);
-        cv.put("timestamp", System.currentTimeMillis()); // Store current timestamp
+        cv.put("timestamp", System.currentTimeMillis());
+        cv.put("diaryDate", getCurrentDate()); // Add diaryDate
 
         getWritableDatabase().insert("diaries_table", "diaryTitle", cv);
+    }
+
+    private String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(new Date());
     }
 
     public void update(String id, String diaryTitle, String diaryImage, String diaryDesc,
@@ -71,13 +94,32 @@ public class DiaryHelper extends SQLiteOpenHelper {
         getWritableDatabase().update("diaries_table", cv, " _ID = ?", args);
     }
 
-    public String getID(Cursor c) { return (c.getString(0)); }
-    public String getDiaryTitle(Cursor c) { return (c.getString(1)); }
-    public String getDiaryImage(Cursor c) { return (c.getString(2)); }
-    public String getDiaryDesc(Cursor c) { return (c.getString(3)); }
-    public double getLatitude(Cursor c) { return (c.getDouble(4)); }
-    public double getLongitude(Cursor c) { return (c.getDouble(5)); }
-    public long getTimestamp(Cursor c) { return (c.getLong(6)); }
-}
+    public String getID(Cursor c) {
+        return (c.getString(0));
+    }
 
+    public String getDiaryTitle(Cursor c) {
+        return (c.getString(1));
+    }
+
+    public String getDiaryImage(Cursor c) {
+        return (c.getString(2));
+    }
+
+    public String getDiaryDesc(Cursor c) {
+        return (c.getString(3));
+    }
+
+    public double getLatitude(Cursor c) {
+        return (c.getDouble(4));
+    }
+
+    public double getLongitude(Cursor c) {
+        return (c.getDouble(5));
+    }
+
+    public long getTimestamp(Cursor c) {
+        return (c.getLong(6));
+    }
+}
 

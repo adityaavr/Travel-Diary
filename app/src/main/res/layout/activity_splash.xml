@@ -1,0 +1,60 @@
+<!-- res/layout/splash_screen.xml -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Student Image Placeholder -->
+    <ImageView
+        android:id="@+id/studentImage"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/studentimage"
+        android:contentDescription="@null" />
+
+    <!-- Student Name -->
+    <TextView
+        android:id="@+id/studentName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/studentImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Student Name: Aditya"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <!-- Admission Number -->
+    <TextView
+        android:id="@+id/admissionNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/studentName"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:text="Admission Number: P2204398"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <!-- App Name -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/admissionNumber"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Travel Diary (MAD Assignment)"
+        android:textColor="@android:color/white"
+        android:textSize="22sp" />
+
+</RelativeLayout>
+
+
+
+
+
+
+

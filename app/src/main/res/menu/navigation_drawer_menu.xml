@@ -1,0 +1,31 @@
+<!-- res/menu/drawer_menu.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Top group -->
+    <group android:id="@+id/group_top">
+        <item
+            android:id="@+id/diary_entries"
+            android:icon="@drawable/image_diary_icon"
+            android:title="Diary Entries" />
+
+        <item
+            android:id="@+id/new_entry"
+            android:icon="@drawable/image_add_icon"
+            android:title="New Entry" />
+    </group>
+
+    <!-- Bottom group -->
+    <group android:id="@+id/group_bottom">
+        <item
+            android:id="@+id/map_view"
+            android:icon="@drawable/explore_map_icon"
+            android:title="Map View" />
+
+        <item
+            android:id="@+id/nav_drawer_about"
+            android:icon="@drawable/about_icon"
+            android:title="About" />
+    </group>
+
+</menu>
+

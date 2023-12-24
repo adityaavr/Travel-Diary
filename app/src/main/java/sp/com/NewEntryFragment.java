@@ -1,6 +1,8 @@
 package sp.com;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -11,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
@@ -25,6 +29,7 @@ import java.util.Locale;
 public class NewEntryFragment extends Fragment {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_PICK = 2;
     private ImageView imageViewPhoto;
     private Uri photoUri;
     private String currentPhotoPath;
@@ -45,34 +50,18 @@ public class NewEntryFragment extends Fragment {
         EditText editTextTitle = view.findViewById(R.id.editTextEntryTitle);
         EditText editTextDescription = view.findViewById(R.id.editTextEntryDescription);
         Button buttonTakePhoto = view.findViewById(R.id.buttonTakePhoto);
+        Button buttonChooseImage = view.findViewById(R.id.buttonChooseImage);
         imageViewPhoto = view.findViewById(R.id.imageViewPhoto);
         Button buttonSaveEntry = view.findViewById(R.id.buttonSaveEntry);
 
-        // initialisation for gpsTracker
-        gpsTracker = new GPSTracker(requireContext(), new GPSTracker.LocationUpdateListener() {
-            @Override
-            public void onLocationUpdate(double latitude, double longitude) {
-                // You can handle location updates here if needed
-            }
+        // initialization for gpsTracker
+        gpsTracker = new GPSTracker(requireContext(), (latitude, longitude) -> {
+            // You can handle location updates here if needed
         });
 
         buttonTakePhoto.setOnClickListener(v -> dispatchTakePictureIntent());
-        buttonSaveEntry.setOnClickListener(v -> {
-            String title = editTextTitle.getText().toString();
-            String description = editTextDescription.getText().toString();
-
-            // Get the current location from the GPS tracker
-            double currentLat = gpsTracker.getLatitude();
-            double currentLon = gpsTracker.getLongitude();
-
-            diaryHelper.insert(title, currentPhotoPath, description, currentLat, currentLon);
-
-            editTextTitle.setText("");
-            editTextDescription.setText("");
-            imageViewPhoto.setVisibility(View.GONE);
-            currentPhotoPath = null; // Reset the current photo path after saving
-        });
-
+        buttonChooseImage.setOnClickListener(v -> openGallery());
+        buttonSaveEntry.setOnClickListener(v -> saveEntry(editTextTitle, editTextDescription));
 
         return view;
     }
@@ -88,12 +77,17 @@ public class NewEntryFragment extends Fragment {
             }
             if (photoFile != null) {
                 photoUri = FileProvider.getUriForFile(getContext(),
-                        "sp.com.fileprovider", // Adjust with your package name
+                        "sp.com.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
+    }
+
+    private void openGallery() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, REQUEST_IMAGE_PICK);
     }
 
     private File createImageFile() throws IOException {
@@ -109,13 +103,56 @@ public class NewEntryFragment extends Fragment {
         return image;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_OK) {
-            imageViewPhoto.setImageURI(photoUri);
-            imageViewPhoto.setVisibility(View.VISIBLE);
+    private void saveEntry(EditText editTextTitle, EditText editTextDescription) {
+        if (currentPhotoPath == null) {
+            Toast.makeText(requireContext(), "Please capture or choose an image before saving an entry", Toast.LENGTH_LONG).show();
+        } else {
+            String title = editTextTitle.getText().toString();
+            String description = editTextDescription.getText().toString();
+
+            // Get the current location from the GPS tracker
+            double currentLat = gpsTracker.getLatitude();
+            double currentLon = gpsTracker.getLongitude();
+
+            diaryHelper.insert(title, currentPhotoPath, description, currentLat, currentLon);
+
+            editTextTitle.setText("");
+            editTextDescription.setText("");
+            imageViewPhoto.setVisibility(View.GONE);
+            currentPhotoPath = null; // Reset the current photo path after saving
         }
     }
+
+    // Setting the Image file path for further use
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                imageViewPhoto.setImageURI(photoUri);
+                imageViewPhoto.setVisibility(View.VISIBLE);
+            } else if (requestCode == REQUEST_IMAGE_PICK && data != null) {
+                Uri selectedImage = data.getData();
+                String imagePath = getRealPathFromURI(selectedImage);
+                imageViewPhoto.setImageURI(selectedImage);
+                imageViewPhoto.setVisibility(View.VISIBLE);
+                currentPhotoPath = imagePath;
+            }
+        }
+    }
+
+    // getting real file path for chosen image
+    private String getRealPathFromURI(Uri contentUri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = requireActivity().getContentResolver().query(contentUri, projection, null, null, null);
+        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String filePath = cursor.getString(columnIndex);
+        cursor.close();
+        return filePath;
+    }
 }
+
+
+
 
 

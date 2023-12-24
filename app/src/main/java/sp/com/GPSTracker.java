@@ -23,7 +23,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 public class GPSTracker extends Service {
 
-    private static final int PERMISSION_REQUEST_CODE = 101; // You can choose any integer value
+    private static final int PERMISSION_REQUEST_CODE = 101;
 
     private final Context mContext;
     private FusedLocationProviderClient fusedLocationClient;
@@ -89,8 +89,8 @@ public class GPSTracker extends Service {
 
         // Create a location request with desired parameters
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000); // Update interval in milliseconds
-        locationRequest.setFastestInterval(5000); // Fastest update interval in milliseconds
+        locationRequest.setInterval(100); // Update interval in milliseconds
+        locationRequest.setFastestInterval(50); // Fastest update interval in milliseconds
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         // Create a location callback

@@ -28,6 +28,12 @@
         android:layout_height="wrap_content"
         android:text="Take Photo"/>
 
+    <Button
+        android:id="@+id/buttonChooseImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose Image"/>
+
     <ImageView
         android:id="@+id/imageViewPhoto"
         android:layout_width="match_parent"
@@ -43,3 +49,4 @@
         android:layout_marginTop="16dp"
         android:text="Save Entry"/>
 </LinearLayout>
+
