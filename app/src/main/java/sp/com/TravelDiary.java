@@ -128,6 +128,8 @@ public class TravelDiary extends AppCompatActivity {
             } else if (id == R.id.nav_drawer_about) {
                 intent = new Intent(TravelDiary.this, About.class);
                 startActivity(intent);
+            } else if (id == R.id.exit) {
+                finish();
             }
 
             if (selectedFragment != null) {
